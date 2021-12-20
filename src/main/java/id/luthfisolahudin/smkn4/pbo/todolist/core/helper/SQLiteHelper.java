@@ -14,7 +14,7 @@ import java.sql.SQLException;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SQLiteHelper {
     private static final String driverClass = "org.sqlite.JDBC";
-    private static final String database = Configuration.databasePath();
+    private static final String databasePath = Configuration.databasePath();
 
     private static SQLiteHelper instance;
 
@@ -28,12 +28,12 @@ public class SQLiteHelper {
 
     public Connection getConnection() {
         log.debug("Getting database connection...");
-        log.debug("Database: [SQLite] " + database);
+        log.debug("Database: [SQLite] " + databasePath);
 
         try {
             Class.forName(driverClass);
 
-            return DriverManager.getConnection(database);
+            return DriverManager.getConnection("jdbc:sqlite:" + databasePath);
         } catch (ClassNotFoundException | SQLException e) {
             log.log(Level.FATAL, e.getStackTrace());
         }
