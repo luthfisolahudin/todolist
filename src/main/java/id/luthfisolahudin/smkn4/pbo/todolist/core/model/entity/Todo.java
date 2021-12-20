@@ -6,7 +6,7 @@ import lombok.*;
 
 @AllArgsConstructor
 @Builder
-@Data(staticConstructor = "of")
+@Data
 public class Todo {
     @Builder.Default
     final TodoId id = null;
