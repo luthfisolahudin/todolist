@@ -46,6 +46,12 @@ public final class TodoRepository {
             Map.ofEntries(
                     Map.entry(ColumnConfigurationKey.NAME, "description"),
                     Map.entry(ColumnConfigurationKey.TYPE, ColumnType.TEXT)
+            ),
+
+            // Column `status`
+            Map.ofEntries(
+                    Map.entry(ColumnConfigurationKey.NAME, "status"),
+                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.INTEGER)
             )
     );
 

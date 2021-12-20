@@ -17,9 +17,17 @@ public class Todo {
     @NonNull
     Description description;
 
+    @NonNull
+    TodoStatus status;
+
     @Value(staticConstructor = "of")
     public static class TodoId {
         @NonNull
         Long value;
+    }
+
+    public enum TodoStatus {
+        PENDING,
+        DONE,
     }
 }
