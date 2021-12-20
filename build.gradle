@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'io.freefair.lombok' version '6.3.0'
+}
+
+group 'id.luthfisolahudin.smkn4.pbo.todolist'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly 'io.github.cdimascio:dotenv-java:2.2.3'
+
+    compileOnly 'com.github.alexfu:SQLiteQueryBuilder:0.3.0'
+
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.16.0'
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.16.0'
+
+    compileOnly 'org.apache.commons:commons-lang3:3.12.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}
