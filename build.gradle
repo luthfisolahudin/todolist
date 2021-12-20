@@ -14,6 +14,8 @@ repositories {
 dependencies {
     implementation 'io.github.cdimascio:dotenv-java:2.2.3'
 
+    implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
+
     implementation 'com.github.alexfu:SQLiteQueryBuilder:0.3.0'
 
     implementation 'org.apache.logging.log4j:log4j-api:2.16.0'
