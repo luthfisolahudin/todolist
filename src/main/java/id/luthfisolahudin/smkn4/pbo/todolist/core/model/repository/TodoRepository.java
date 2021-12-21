@@ -10,6 +10,7 @@ import id.luthfisolahudin.smkn4.pbo.todolist.core.common.ColumnConfigurationKey;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.helper.SQLiteHelper;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.model.entity.Todo;
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
@@ -65,7 +66,7 @@ public final class TodoRepository {
         log.debug("Creating table " + table);
 
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = queryCreateTable().toString();
 
             statement.execute(query);
@@ -88,8 +89,9 @@ public final class TodoRepository {
 
     public static Boolean has(Todo.TodoId id) {
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = queryCountById(id).toString();
+
             final ResultSet resultSet = statement.executeQuery(query);
             final int countItemById = resultSet.getInt(1);
 
@@ -111,8 +113,9 @@ public final class TodoRepository {
         final List<Todo> todoList = new ArrayList<>();
 
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = querySearch(searchQuery).toString();
+
             final ResultSet resultSet = statement.executeQuery(query);
 
             while (resultSet.next()) {
@@ -142,8 +145,9 @@ public final class TodoRepository {
 
     public static Todo getById(Todo.TodoId id) {
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = queryGetById(id).toString();
+
             final ResultSet resultSet = statement.executeQuery(query);
 
             return Todo.fromResultSet(resultSet);
@@ -165,8 +169,9 @@ public final class TodoRepository {
         final List<Todo> todoList = new ArrayList<>();
 
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = queryGetAll().toString();
+
             final ResultSet resultSet = statement.executeQuery(query);
 
             while (resultSet.next()) {
@@ -190,7 +195,8 @@ public final class TodoRepository {
             final String[] returnColumn = new String[]{
                     "id",
             };
-            final PreparedStatement preparedStatement = helper.getConnection()
+
+            @Cleanup final PreparedStatement preparedStatement = helper.getConnection()
                     .prepareStatement(query, returnColumn);
 
             preparedStatement.execute();
@@ -220,13 +226,14 @@ public final class TodoRepository {
 
     public static Todo update(Todo.TodoId id, Todo todo) {
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = queryUpdate(id, todo);
 
             statement.execute(query);
 
             return getById(id);
         } catch (SQLException e) {
+            e.printStackTrace();
             log.log(Level.FATAL, e.getStackTrace());
         }
 
@@ -267,7 +274,7 @@ public final class TodoRepository {
 
     public static Boolean delete(Todo.TodoId id) {
         try {
-            final Statement statement = helper.getConnection().createStatement();
+            @Cleanup final Statement statement = helper.getConnection().createStatement();
             final String query = queryDelete(id).toString();
 
             final int affectedRow = statement.executeUpdate(query);
