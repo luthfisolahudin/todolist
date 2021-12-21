@@ -4,6 +4,10 @@ import id.luthfisolahudin.smkn4.pbo.todolist.core.model.Description;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.model.Name;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @AllArgsConstructor
 @Builder
@@ -26,6 +30,26 @@ public class Todo {
     @NonNull
     @With
     TodoStatus status = TodoStatus.PENDING;
+
+    public static Todo fromResultSet(ResultSet resultSet) {
+        try {
+            final Todo.TodoId id = Todo.TodoId.of(resultSet.getLong("id"));
+            final Name name = Name.of(resultSet.getString("name"));
+            final Description description = Description.of(resultSet.getString("description"));
+            final Todo.TodoStatus status = Todo.TodoStatus.valueOf(resultSet.getString("status"));
+
+            return Todo.builder()
+                    .id(id)
+                    .name(name)
+                    .description(description)
+                    .status(status)
+                    .build();
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return null;
+    }
 
     @Value(staticConstructor = "of")
     public static class TodoId {
