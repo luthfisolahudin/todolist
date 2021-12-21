@@ -36,6 +36,10 @@ public class Todo {
     @With
     TodoStatus status = TodoStatus.PENDING;
 
+    public Boolean hasDescription() {
+        return !description.isBlank();
+    }
+
     public static Todo fromResultSet(ResultSet resultSet) {
         try {
             final Todo.TodoId id = Todo.TodoId.of(resultSet.getLong("id"));
