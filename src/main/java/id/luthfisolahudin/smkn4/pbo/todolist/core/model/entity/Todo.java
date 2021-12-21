@@ -2,7 +2,12 @@ package id.luthfisolahudin.smkn4.pbo.todolist.core.model.entity;
 
 import id.luthfisolahudin.smkn4.pbo.todolist.core.model.Description;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.model.Name;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.Value;
+import lombok.With;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 
