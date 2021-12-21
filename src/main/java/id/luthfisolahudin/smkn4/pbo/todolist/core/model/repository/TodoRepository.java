@@ -1,6 +1,5 @@
 package id.luthfisolahudin.smkn4.pbo.todolist.core.model.repository;
 
-import com.alexfu.sqlitequerybuilder.api.Column;
 import com.alexfu.sqlitequerybuilder.api.ColumnConstraint;
 import com.alexfu.sqlitequerybuilder.api.ColumnType;
 import com.alexfu.sqlitequerybuilder.api.SQLiteQueryBuilder;
@@ -9,19 +8,18 @@ import com.alexfu.sqlitequerybuilder.builder.SegmentBuilder;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.Configuration;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.common.ColumnConfigurationKey;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.helper.SQLiteHelper;
-import id.luthfisolahudin.smkn4.pbo.todolist.core.model.Description;
-import id.luthfisolahudin.smkn4.pbo.todolist.core.model.Name;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.model.entity.Todo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -51,10 +49,9 @@ public final class TodoRepository {
             // Column `status`
             Map.ofEntries(
                     Map.entry(ColumnConfigurationKey.NAME, "status"),
-                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.INTEGER)
+                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.TEXT)
             )
     );
-
     private static final SQLiteHelper helper = SQLiteHelper.getInstance();
 
     public static void initialize() {
@@ -62,8 +59,8 @@ public final class TodoRepository {
         log.debug("Creating table " + table);
 
         try {
-            Statement statement = helper.getConnection().createStatement();
-            String query = queryCreateTable().toString();
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = queryCreateTable().toString();
 
             statement.execute(query);
         } catch (SQLException e) {
@@ -72,41 +69,204 @@ public final class TodoRepository {
     }
 
     private static SegmentBuilder queryCreateTable() {
-        CreateTableSegmentBuilder queryBuilder = SQLiteQueryBuilder.create()
+        final CreateTableSegmentBuilder queryBuilder = SQLiteQueryBuilder.create()
                 .table(table)
                 .ifNotExists();
 
         for (Map<ColumnConfigurationKey, Object> column : columns) {
-            queryBuilder.column(createColumn(column));
+            queryBuilder.column(SQLiteHelper.createColumn(column));
         }
 
         return queryBuilder;
     }
 
-    private static Column createColumn(Map<ColumnConfigurationKey, Object> columnConfiguration) {
-        String name = (String) columnConfiguration.get(ColumnConfigurationKey.NAME);
-        ColumnType type = (ColumnType) columnConfiguration.get(ColumnConfigurationKey.TYPE);
-        ColumnConstraint constraint = (ColumnConstraint) columnConfiguration.getOrDefault(
-                ColumnConfigurationKey.CONSTRAINT,
-                null
-        );
-        String defaultValue = (String) columnConfiguration.getOrDefault(
-                ColumnConfigurationKey.DEFAULT_VALUE,
-                null
-        );
+    public static List<Todo> search(String searchQuery) {
+        final List<Todo> todoList = new ArrayList<>();
 
-        return new Column(name, type, constraint, defaultValue);
+        try {
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = querySearch(searchQuery).toString();
+            final ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                todoList.add(Todo.fromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return todoList;
     }
 
-    public static Todo get(Todo.TodoId id) {
-        return Todo.builder()
-                .id(id)
-                .name(Name.of("name"))
-                .description(Description.of("description"))
-                .build();
+    private static SegmentBuilder querySearch(String query) {
+        final Set<String> searchableFields = Set.of(
+                "name",
+                "description"
+        );
+        final String queryWithLikeClosure = "'%" + query + "%'";
+        final String whereCondition = searchableFields.stream()
+                .map(field -> String.format("'%s' like %s", field, queryWithLikeClosure))
+                .collect(Collectors.joining(" or ", "", ""));
+
+        return SQLiteQueryBuilder.select("*")
+                .from(table)
+                .where(whereCondition);
     }
 
-    public static List<Todo> search(String query) {
-        return Collections.emptyList();
+    public static Todo getById(Todo.TodoId id) {
+        try {
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = queryGetById(id).toString();
+            final ResultSet resultSet = statement.executeQuery(query);
+
+            return Todo.fromResultSet(resultSet);
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return null;
+    }
+
+    private static SegmentBuilder queryGetById(Todo.TodoId id) {
+        return SQLiteQueryBuilder.select("*")
+                .from(table)
+                .where("id = " + id.getValue())
+                .limit(1);
+    }
+
+    public static List<Todo> getAll() {
+        final List<Todo> todoList = new ArrayList<>();
+
+        try {
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = queryGetAll().toString();
+            final ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                todoList.add(Todo.fromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return todoList;
+    }
+
+    private static SegmentBuilder queryGetAll() {
+        return SQLiteQueryBuilder.select("*")
+                .from(table);
+    }
+
+    public static Todo.TodoId insert(Todo todo) {
+        try {
+            final String query = queryInsert(todo).toString();
+            final String[] returnColumn = new String[]{
+                    "id",
+            };
+            final PreparedStatement preparedStatement = helper.getConnection()
+                    .prepareStatement(query, returnColumn);
+
+            preparedStatement.execute();
+
+            Long insertedId = preparedStatement.getGeneratedKeys().getLong(1);
+
+            return Todo.TodoId.of(insertedId);
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return null;
+    }
+
+    private static SegmentBuilder queryInsert(Todo todo) {
+        final Map<String, String> data = new TreeMap<>() {{
+            put("name", todo.getName().getValue());
+            put("description", todo.getDescription().getValue());
+            put("status", todo.getStatus().toString());
+        }};
+
+        return SQLiteQueryBuilder.insert()
+                .into(table)
+                .columns(data.keySet().toArray(new String[0]))
+                .values((Object[]) data.values().toArray(new String[0]));
+    }
+
+    public static Todo update(Todo.TodoId id, Todo todo) {
+        try {
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = queryUpdate(id, todo);
+
+            statement.execute(query);
+
+            return getById(id);
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return null;
+    }
+
+    private static String queryUpdate(Todo.TodoId id, Todo todo) {
+        final Map<String, String> data = new HashMap<>() {{
+            put("name", todo.getName().getValue());
+            put("description", todo.getDescription().getValue());
+            put("status", todo.getStatus().toString());
+        }};
+        final Map<String, String> conditional = Map.ofEntries(
+                Map.entry("id", id.getValue().toString())
+        );
+
+        String dataQuery = data.entrySet().stream()
+                .map(entry -> {
+                    String value = entry.getValue() != null ? String.format("'%s'", entry.getValue()) : null;
+                    return String.format("%s = %s", entry.getKey(), value);
+                })
+                .collect(Collectors.joining(", ", "", ""));
+        String conditionalQuery = conditional.entrySet().stream()
+                .map(entry -> {
+                    String value = entry.getValue() != null ? String.format("'%s'", entry.getValue()) : null;
+                    return String.format("%s = %s", entry.getKey(), value);
+                })
+                .collect(Collectors.joining(", ", "", ""));
+
+        return new StringJoiner(" ")
+                .add("update")
+                .add(table)
+                .add("set")
+                .add(dataQuery)
+                .add("where")
+                .add(conditionalQuery) + ";";
+    }
+
+    public static Boolean delete(Todo.TodoId id) {
+        try {
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = queryDelete(id).toString();
+
+            final int affectedRow = statement.executeUpdate(query);
+
+            return affectedRow >= 1;
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return false;
+    }
+
+    private static SegmentBuilder queryDelete(Todo.TodoId id) {
+        Map<String, String> conditional = Map.ofEntries(
+                Map.entry("id", id.getValue().toString())
+        );
+
+        return SQLiteQueryBuilder.delete()
+                .from(table)
+                .where(
+                        conditional.entrySet().stream()
+                                .map(entry -> {
+                                    String value = entry.getValue() != null ? String.format("'%s'", entry.getValue()) : null;
+                                    return String.format("%s = %s", entry.getKey(), value);
+                                })
+                                .collect(Collectors.joining(", ", "", ""))
+                );
     }
 }
