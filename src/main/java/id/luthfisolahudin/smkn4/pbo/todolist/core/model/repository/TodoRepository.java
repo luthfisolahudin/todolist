@@ -80,6 +80,27 @@ public final class TodoRepository {
         return queryBuilder;
     }
 
+    public static Boolean has(Todo.TodoId id) {
+        try {
+            final Statement statement = helper.getConnection().createStatement();
+            final String query = queryCountById(id).toString();
+            final ResultSet resultSet = statement.executeQuery(query);
+            final int countItemById = resultSet.getInt(1);
+
+            return countItemById >= 1;
+        } catch (SQLException e) {
+            log.log(Level.FATAL, e.getStackTrace());
+        }
+
+        return false;
+    }
+
+    private static SegmentBuilder queryCountById(Todo.TodoId id) {
+        return SQLiteQueryBuilder.select("count(id)")
+                .from(table)
+                .where("id = " + id.getValue());
+    }
+
     public static List<Todo> search(String searchQuery) {
         final List<Todo> todoList = new ArrayList<>();
 

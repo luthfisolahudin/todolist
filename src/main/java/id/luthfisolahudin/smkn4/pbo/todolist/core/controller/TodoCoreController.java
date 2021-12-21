@@ -9,6 +9,10 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TodoCoreController {
+    public static Boolean isExist(Todo.TodoId id) {
+        return TodoRepository.has(id);
+    }
+
     public static List<Todo> search(String query) {
         return TodoRepository.search(query);
     }
