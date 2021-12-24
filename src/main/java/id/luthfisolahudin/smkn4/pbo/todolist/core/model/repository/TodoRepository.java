@@ -1,12 +1,12 @@
 package id.luthfisolahudin.smkn4.pbo.todolist.core.model.repository;
 
+import com.alexfu.sqlitequerybuilder.api.Column;
 import com.alexfu.sqlitequerybuilder.api.ColumnConstraint;
 import com.alexfu.sqlitequerybuilder.api.ColumnType;
 import com.alexfu.sqlitequerybuilder.api.SQLiteQueryBuilder;
 import com.alexfu.sqlitequerybuilder.builder.CreateTableSegmentBuilder;
 import com.alexfu.sqlitequerybuilder.builder.SegmentBuilder;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.Configuration;
-import id.luthfisolahudin.smkn4.pbo.todolist.core.common.ColumnConfigurationKey;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.helper.SQLiteHelper;
 import id.luthfisolahudin.smkn4.pbo.todolist.core.model.entity.Todo;
 import lombok.AccessLevel;
@@ -32,31 +32,31 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TodoRepository {
     private static final String table = Configuration.databaseTableName();
-    private static final List<Map<ColumnConfigurationKey, Object>> columns = List.of(
+    private static final List<Column> columns = List.of(
             // Column `id`
-            Map.ofEntries(
-                    Map.entry(ColumnConfigurationKey.NAME, "id"),
-                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.INTEGER),
-                    Map.entry(ColumnConfigurationKey.CONSTRAINT, ColumnConstraint.PRIMARY_KEY_AUTO_INCREMENT)
+            new Column(
+                    "id",
+                    ColumnType.INTEGER,
+                    ColumnConstraint.PRIMARY_KEY_AUTO_INCREMENT
             ),
 
             // Column `name`
-            Map.ofEntries(
-                    Map.entry(ColumnConfigurationKey.NAME, "name"),
-                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.TEXT),
-                    Map.entry(ColumnConfigurationKey.CONSTRAINT, ColumnConstraint.NOT_NULL)
+            new Column(
+                    "name",
+                    ColumnType.TEXT,
+                    ColumnConstraint.NOT_NULL
             ),
 
             // Column `description`
-            Map.ofEntries(
-                    Map.entry(ColumnConfigurationKey.NAME, "description"),
-                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.TEXT)
+            new Column(
+                    "description",
+                    ColumnType.TEXT
             ),
 
             // Column `status`
-            Map.ofEntries(
-                    Map.entry(ColumnConfigurationKey.NAME, "status"),
-                    Map.entry(ColumnConfigurationKey.TYPE, ColumnType.TEXT)
+            new Column(
+                    "status",
+                    ColumnType.TEXT
             )
     );
     private static final SQLiteHelper helper = SQLiteHelper.getInstance();
@@ -80,8 +80,8 @@ public final class TodoRepository {
                 .table(table)
                 .ifNotExists();
 
-        for (Map<ColumnConfigurationKey, Object> column : columns) {
-            queryBuilder.column(SQLiteHelper.createColumn(column));
+        for (Column column : columns) {
+            queryBuilder.column(column);
         }
 
         return queryBuilder;
