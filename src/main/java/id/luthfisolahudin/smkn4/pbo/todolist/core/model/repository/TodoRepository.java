@@ -136,7 +136,7 @@ public final class TodoRepository {
         final String queryWithLikeClosure = "'%" + query + "%'";
         final String whereCondition = searchableFields.stream()
                 .map(field -> String.format("'%s' like %s", field, queryWithLikeClosure))
-                .collect(Collectors.joining(" or ", "", ""));
+                .collect(Collectors.joining(" or "));
 
         return SQLiteQueryBuilder.select("*")
                 .from(table)
@@ -220,8 +220,8 @@ public final class TodoRepository {
 
         return SQLiteQueryBuilder.insert()
                 .into(table)
-                .columns(data.keySet().toArray(new String[0]))
-                .values((Object[]) data.values().toArray(new String[0]));
+                .columns(data.keySet().toArray(String[]::new))
+                .values((Object[]) data.values().toArray(String[]::new));
     }
 
     public static Todo update(Todo.TodoId id, Todo todo) {
@@ -252,16 +252,16 @@ public final class TodoRepository {
 
         String dataQuery = data.entrySet().stream()
                 .map(entry -> {
-                    String value = entry.getValue() != null ? String.format("'%s'", entry.getValue()) : null;
+                    String value = entry.getValue() != null ?
+                            String.format("'%s'", entry.getValue()) :
+                            null;
+
                     return String.format("%s = %s", entry.getKey(), value);
                 })
-                .collect(Collectors.joining(", ", "", ""));
+                .collect(Collectors.joining(", "));
         String conditionalQuery = conditional.entrySet().stream()
-                .map(entry -> {
-                    String value = entry.getValue() != null ? String.format("'%s'", entry.getValue()) : null;
-                    return String.format("%s = %s", entry.getKey(), value);
-                })
-                .collect(Collectors.joining(", ", "", ""));
+                .map(entry -> String.format("%s = '%s'", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(", "));
 
         return new StringJoiner(" ")
                 .add("update")
@@ -288,19 +288,8 @@ public final class TodoRepository {
     }
 
     private static SegmentBuilder queryDelete(Todo.TodoId id) {
-        Map<String, String> conditional = Map.ofEntries(
-                Map.entry("id", id.getValue().toString())
-        );
-
         return SQLiteQueryBuilder.delete()
                 .from(table)
-                .where(
-                        conditional.entrySet().stream()
-                                .map(entry -> {
-                                    String value = entry.getValue() != null ? String.format("'%s'", entry.getValue()) : null;
-                                    return String.format("%s = %s", entry.getKey(), value);
-                                })
-                                .collect(Collectors.joining(", ", "", ""))
-                );
+                .where("id = " + id.getValue());
     }
 }
