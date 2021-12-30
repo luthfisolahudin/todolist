@@ -8,10 +8,11 @@ import lombok.NoArgsConstructor;
 public final class TodoNotDeleted {
     public static void display() {
         System.out.println("Gagal menghapus Todo.");
+        System.out.println();
     }
 
     public static void display(Todo.TodoId id) {
-        display();
-        System.out.println("ID Todo: " + id.getValue());
+        System.out.printf("Gagal menghapus Todo dengan ID: %d.\n", id.getValue());
+        System.out.println();
     }
 }
