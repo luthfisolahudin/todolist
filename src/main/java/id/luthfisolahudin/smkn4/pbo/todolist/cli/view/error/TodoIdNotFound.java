@@ -7,5 +7,6 @@ import lombok.NoArgsConstructor;
 public final class TodoIdNotFound {
     public static void display() {
         System.out.println("ID yang Anda masukan tidak ditemukan.");
+        System.out.println();
     }
 }
