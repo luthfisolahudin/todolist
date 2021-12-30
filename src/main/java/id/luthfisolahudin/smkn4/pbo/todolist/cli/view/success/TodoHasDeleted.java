@@ -12,7 +12,7 @@ public final class TodoHasDeleted {
     }
 
     public static void display(Todo.TodoId id) {
-        System.out.printf("Todo dengan ID %d berhasil dihapus.", id.getValue());
+        System.out.printf("Todo dengan ID %d berhasil dihapus.\n", id.getValue());
         System.out.println();
     }
 }
