@@ -8,10 +8,12 @@ import lombok.NoArgsConstructor;
 public final class TodoHasCreated {
     public static void display() {
         System.out.println("Todo telah berhasil dibuat.");
+        System.out.println();
     }
 
     public static void display(Todo.TodoId id) {
-        display();
-        System.out.println("ID Todo: " + id.getValue());
+        System.out.println("Todo telah berhasil dibuat.");
+        System.out.printf("ID Todo yang sudah dibuat: %d.\n", id.getValue());
+        System.out.println();
     }
 }
