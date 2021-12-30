@@ -13,6 +13,7 @@ public final class TodoUpdateName {
 
     public static Map<String, String> display(Todo todo) {
         System.out.println("[cancel] Membatalkan perubahan");
+        System.out.println();
         System.out.print("Masukan Nama Baru Todo: ");
         String inputNama = input.nextLine();
         System.out.println();
