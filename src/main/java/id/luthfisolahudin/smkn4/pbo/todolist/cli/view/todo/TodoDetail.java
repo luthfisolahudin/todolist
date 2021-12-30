@@ -30,6 +30,7 @@ public final class TodoDetail {
         System.out.println("    2. Ubah Nama");
         System.out.println("    3. Ubah Deskripsi");
         System.out.println("    4. Hapus");
+        System.out.println();
         System.out.println("[list] Kembali ke daftar Todo");
         System.out.println("[quit] Keluar dari aplikasi");
         System.out.println();
