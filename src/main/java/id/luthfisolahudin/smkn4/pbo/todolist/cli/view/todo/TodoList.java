@@ -34,6 +34,7 @@ public final class TodoList {
 
         System.out.println("[create] Buat Todo baru");
         System.out.println("  [quit] Keluar dari aplikasi");
+        System.out.println();
         System.out.print("Masukan ID todo yang ingin Anda lihat: ");
         String inputId = input.nextLine();
         System.out.println();
