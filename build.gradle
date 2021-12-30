@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'id.luthfisolahudin.smkn4.pbo.todolist'
-version 'v0.1.0'
+version 'v0.1.1'
 
 repositories {
     mavenCentral()
