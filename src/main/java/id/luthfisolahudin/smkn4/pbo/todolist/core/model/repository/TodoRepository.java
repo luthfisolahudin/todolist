@@ -56,7 +56,9 @@ public final class TodoRepository {
             // Column `status`
             new Column(
                     "status",
-                    ColumnType.TEXT
+                    ColumnType.TEXT,
+                    ColumnConstraint.NOT_NULL,
+                    "PENDING"
             )
     );
     private static final SQLiteHelper helper = SQLiteHelper.getInstance();
